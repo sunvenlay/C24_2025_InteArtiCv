@@ -1,0 +1,144 @@
+.lector-cv-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding-bottom: 60px; /* Espacio para el footer */
+  overflow: hidden;
+}
+
+.lector-cv-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1800px;
+  margin-top: 20px;
+  gap: 50px;
+  padding: 20px;
+}
+
+.cv-preview,
+.cv-analysis {
+  background: white;
+  padding: 50px;
+  border-radius: 20px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+  flex: 1;
+  min-width: 350px;
+  max-width: 800px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.cv-analysis {
+  order: 1; /* Mueve el informe a la derecha */
+}
+
+.upload-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 350px;
+  border: 3px dashed #bbb;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 26px;
+  color: #555;
+  position: relative;
+}
+
+/* Barra de revisión */
+.review-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Permite ajustar los botones */
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  margin-top: 30px;
+}
+
+/* Botones en modo escritorio: tamaño fijo */
+.review-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 250px; /* Tamaño fijo en desktop */
+  background: #007bff;
+  color: white;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  white-space: normal; /* Permite que el texto se ajuste en varias líneas */
+  text-align: center;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.review-bar button:hover {
+  transform: scale(1.05);
+}
+
+/* Botones individuales */
+.btn-review { background: #17a2b8; }
+.btn-review:hover { background: #117a8b; }
+
+.btn-accept { background: #28a745; }
+.btn-accept:hover { background: #1e7e34; }
+
+.btn-reject { background: #dc3545; }
+.btn-reject:hover { background: #b21f2d; }
+
+/* Footer */
+.footer-container {
+  width: 100%;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustes para pantallas pequeñas (responsive) */
+@media screen and (max-width: 768px) {
+  .review-bar {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .review-bar button {
+    width: 100%;          /* Se adapta al ancho del contenedor */
+    max-width: 250px;      /* Se mantiene un límite máximo para que no se desborde */
+    font-size: 18px;       /* Se reduce ligeramente el tamaño de fuente */
+  }
+  
+  /* Opcional: Mostrar solo iconos en móviles para ahorrar espacio */
+  .review-bar button span {
+    display: none;
+  }
+  
+  .review-bar button::before {
+    display: inline-block;
+    font-size: 20px;
+  }
+  
+  .btn-review::before { content: "📄"; }
+  .btn-accept::before { content: "✔️"; }
+  .btn-reject::before { content: "❌"; }
+}

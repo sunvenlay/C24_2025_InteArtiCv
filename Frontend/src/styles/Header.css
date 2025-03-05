@@ -1,0 +1,283 @@
+/* Estilos del Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 15px 30px;
+  background: white;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+/* Contenedor del contenido del Header */
+.header-content {
+  display: flex;
+  justify-content: space-between; /* Asegura que el perfil esté a la derecha */
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  flex-grow: 1;
+}
+
+/* Contenedor de Slidebar y Logo */
+.logo-slidebar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0;
+}
+
+/* Línea separadora entre Logo y Slidebar */
+.separator {
+  height: 40px;
+  width: 1px;
+  background-color: #808080;
+  margin: 0;
+}
+
+/* Ajuste del tamaño del Logo */
+.logo {
+  width: 140px;
+  height: auto;
+  display: block;
+}
+
+/* Contenedor derecho del header (Perfil y Notificaciones) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: auto;
+}
+
+/* Contenedor de iconos de usuario y notificaciones */
+.nav-icons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 0;
+}
+
+/* Ajuste para los iconos */
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  color: #808080;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn:hover {
+  color: #20acf8;
+  background-color: #f1f1f1;
+}
+
+/* Ajuste del tamaño del botón Slidebar */
+.slidebar-icon {
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #808080;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  position: relative;
+  margin-left: auto;
+}
+
+.slidebar-icon:hover {
+  background-color: #f1f1f1;
+}
+
+/* ============================ */
+/*      ESTILOS DEL PERFIL      */
+/* ============================ */
+
+/* Contenedor del perfil */
+.perfil-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Botón de perfil */
+.perfil-button {
+  background: white;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s;
+}
+
+.perfil-button:hover {
+  background: #f1f1f1;
+}
+
+/* Icono de perfil */
+.perfil-icon {
+  font-size: 20px;
+}
+
+/* Menú desplegable */
+.perfil-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  min-width: 120px;
+  text-align: center;
+  z-index: 100;
+}
+
+/* Botón de logout */
+.logout-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px;
+  width: 100%;
+  text-align: center;
+  transition: background 0.3s;
+}
+
+.logout-button:hover {
+  background: #f1f1f1;
+}
+
+/* ======================= */
+/* 📱 RESPONSIVE DESIGN 📱 */
+/* ======================= */
+
+@media screen and (max-width: 1024px) {
+  .header {
+    padding: 12px 20px;
+  }
+
+  .header-content {
+    padding: 0 15px;
+    justify-content: space-between; /* Mantiene el perfil alineado */
+  }
+
+  .logo {
+    width: 120px;
+  }
+
+  .icon-btn {
+    font-size: 14px;
+    width: 35px;
+    height: 35px;
+  }
+
+  .slidebar-icon {
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+    order: 2;
+    align-self: center;
+    position: relative;
+  }
+
+  .perfil-menu {
+    top: 35px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header {
+    padding: 10px 15px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .logo {
+    width: 100px;
+  }
+
+  .nav-icons {
+    gap: 8px;
+  }
+
+  .icon-btn {
+    font-size: 12px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .slidebar-icon {
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+    order: 2;
+    align-self: center;
+    position: relative;
+  }
+
+  .perfil-menu {
+    top: 35px;
+    right: -10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .header {
+    padding: 8px 10px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .logo {
+    width: 90px;
+  }
+
+  .nav-icons {
+    gap: 6px;
+  }
+
+  .icon-btn {
+    font-size: 10px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .slidebar-icon {
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+    order: 2;
+    align-self: center;
+    position: relative;
+  }
+
+  .perfil-menu {
+    top: 30px;
+    right: -15px;
+  }
+}
