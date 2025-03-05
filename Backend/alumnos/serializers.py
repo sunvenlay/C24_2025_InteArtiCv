@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Alumno, CV, Habilidad, Informe
+from .models import Alumno, CV, Habilidad, Informe, Entrevista, HistorialEntrevistas
 
 class AlumnoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,14 @@ class InformeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Informe
         fields = '__all__'
+
+class EntrevistaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entrevista
+        fields = '__all__'
+
+class HistorialEntrevistasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistorialEntrevistas
+        fields = '__all__'
+

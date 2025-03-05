@@ -46,3 +46,24 @@ class Informe(models.Model):
     fortalezas = models.TextField()
     areas_mejora = models.TextField()
     fecha_generacion = models.DateTimeField(auto_now_add=True)
+
+class Entrevista(models.Model):
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    pregunta = models.TextField()
+    respuesta = models.TextField()
+    retroalimentacion = models.TextField()  # Feedback del chatbot
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Entrevista de {self.alumno.nombre} - {self.fecha}"
+
+class HistorialEntrevistas(models.Model):
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    entrevista = models.ForeignKey(Entrevista, on_delete=models.CASCADE)
+    resultado = models.CharField(max_length=255)  # Ejemplo: "Aprobado", "Necesita mejorar"
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Historial {self.alumno.nombre} - {self.resultado}"
+
+
