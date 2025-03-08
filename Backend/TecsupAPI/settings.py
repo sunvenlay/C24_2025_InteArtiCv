@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "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")
 
 # Application definition
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
     'alumnos',
 ]
