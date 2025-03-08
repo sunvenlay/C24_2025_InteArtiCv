@@ -99,6 +99,8 @@ class PreguntaEntrevista(models.Model):
 class Entrevista(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name="entrevistas")
     fecha = models.DateTimeField(auto_now_add=True)
+    promedio_puntuacion = models.FloatField(null=True, blank=True)  # 🔹 Guardamos el promedio
+    resultado_final = models.CharField(max_length=255, null=True, blank=True)  # 🔹 Guardamos la evaluación final
 
     def __str__(self):
         return f"Entrevista de {self.alumno.nombre}"

@@ -218,7 +218,6 @@ class IniciarChatEntrevistaView(APIView):
             "pregunta_texto": primera_pregunta.texto
         }, status=status.HTTP_201_CREATED)
 
-    
 #Envio de respuestas y retroalimentacion con la IA
 class ChatEntrevistaView(APIView):
     """
@@ -297,7 +296,7 @@ class ChatEntrevistaView(APIView):
                     "mensaje": "Error: No se encontraron respuestas registradas."
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            promedio_puntuacion = sum(respuestas) / len(respuestas)  # **🔥 Arreglamos el cálculo**
+            promedio_puntuacion = sum(respuestas) / len(respuestas)  # 🔥 Calculamos el promedio final
 
             if promedio_puntuacion >= 8:
                 resultado_final = "¡Felicidades! Estás listo para una entrevista real."
@@ -305,6 +304,11 @@ class ChatEntrevistaView(APIView):
                 resultado_final = "Tienes un desempeño aceptable, pero hay áreas que puedes mejorar."
             else:
                 resultado_final = "Debes mejorar tus respuestas antes de una entrevista laboral."
+
+            # **🔥 GUARDAMOS LOS RESULTADOS EN LA BASE DE DATOS 🔥**
+            entrevista.promedio_puntuacion = promedio_puntuacion
+            entrevista.resultado_final = resultado_final
+            entrevista.save()
 
             return Response({
                 "mensaje": "Entrevista finalizada",
@@ -320,3 +324,4 @@ class ChatEntrevistaView(APIView):
             "siguiente_pregunta_id": siguiente_pregunta.id if siguiente_pregunta else None,
             "siguiente_pregunta_texto": siguiente_pregunta.texto if siguiente_pregunta else None
         }, status=status.HTTP_201_CREATED)
+
