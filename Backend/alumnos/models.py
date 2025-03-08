@@ -110,6 +110,7 @@ class RespuestaEntrevista(models.Model):
     pregunta = models.ForeignKey(PreguntaEntrevista, on_delete=models.CASCADE, related_name="respuestas")
     respuesta = models.TextField()
     retroalimentacion = models.TextField(blank=True, null=True)  # Se llenará con IA
+    puntuacion = models.IntegerField(null=True, blank=True)  # 🔥 Nueva puntuación
 
     def __str__(self):
         return f"Respuesta a {self.pregunta.texto[:50]}"

@@ -1,3 +1,4 @@
+import json
 import random
 import fitz  # PyMuPDF para extraer texto de PDF
 import docx  # python-docx para extraer texto de Word
@@ -192,38 +193,36 @@ class DescargarInformePDFView(APIView):
         return response
 
 #IniciarEntrevista
-class IniciarEntrevistaView(APIView):
+class IniciarChatEntrevistaView(APIView):
     """
-    Inicia una nueva entrevista para un alumno y genera preguntas aleatorias.
+    Inicia una entrevista en formato chatbot, enviando la primera pregunta.
     """
-
     def post(self, request, *args, **kwargs):
         alumno_id = request.data.get("alumno_id")
-
-        # Verificar que el alumno existe
         alumno = get_object_or_404(Alumno, id=alumno_id)
 
-        # Crear una nueva entrevista
+        # Crear entrevista
         entrevista = Entrevista.objects.create(alumno=alumno)
 
-        # Seleccionar 5 preguntas aleatorias
-        preguntas = list(PreguntaEntrevista.objects.all())
-        if len(preguntas) < 5:
-            return Response({"error": "No hay suficientes preguntas en la base de datos."},
-                            status=status.HTTP_400_BAD_REQUEST)
-        
-        preguntas_seleccionadas = random.sample(preguntas, 5)
+        # Seleccionar 6 preguntas aleatorias
+        preguntas = list(PreguntaEntrevista.objects.order_by('?')[:6])
+        primera_pregunta = preguntas.pop(0)
+
+        # Guardar las preguntas seleccionadas en sesión o base de datos (opcional)
+        request.session[f"preguntas_entrevista_{entrevista.id}"] = [p.id for p in preguntas]
 
         return Response({
             "mensaje": "Entrevista iniciada",
             "entrevista_id": entrevista.id,
-            "preguntas": [{"id": p.id, "texto": p.texto} for p in preguntas_seleccionadas]
+            "pregunta_id": primera_pregunta.id,
+            "pregunta_texto": primera_pregunta.texto
         }, status=status.HTTP_201_CREATED)
+
     
 #Envio de respuestas y retroalimentacion con la IA
-class ResponderEntrevistaView(APIView):
+class ChatEntrevistaView(APIView):
     """
-    Guarda la respuesta de una pregunta de entrevista y genera retroalimentación con ChatGPT.
+    Permite responder una pregunta en el chat de la entrevista y obtener retroalimentación.
     """
 
     def post(self, request, *args, **kwargs):
@@ -240,35 +239,84 @@ class ResponderEntrevistaView(APIView):
             respuesta=respuesta_texto
         )
 
+        # Generar retroalimentación y puntuación con ChatGPT
         prompt = f"""
-        Actúa como un entrevistador de una empresa de tecnología. 
-        El candidato respondió a la siguiente pregunta:
+        Actúa como un entrevistador profesional. Evalúa la siguiente respuesta y genera una salida estrictamente en formato JSON con las siguientes claves:
+        {{
+            "retroalimentacion": "Tu retroalimentación detallada aquí",
+            "puntuacion": Número del 1 al 10
+        }}
+
         Pregunta: {pregunta.texto}
         Respuesta del candidato: {respuesta_texto}
-        
-        Proporciona una retroalimentación detallada sobre la calidad de la respuesta,
-        sugiriendo mejoras si es necesario.
         """
 
         try:
-            client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # ✅ PASANDO LA API KEY
+            client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "Eres un experto en entrevistas laborales."},
+                    {"role": "system", "content": "Eres un experto en entrevistas laborales y solo responderás en formato JSON válido."},
                     {"role": "user", "content": prompt}
                 ]
             )
 
-            retroalimentacion_texto = response.choices[0].message.content
-            respuesta.retroalimentacion = retroalimentacion_texto
+            evaluacion_texto = response.choices[0].message.content.strip()
+
+            # Intentamos cargar el JSON
+            try:
+                resultado = json.loads(evaluacion_texto)
+            except json.JSONDecodeError:
+                return Response({"error": "La respuesta de OpenAI no está en formato JSON válido."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Guardar los datos en la BD
+            respuesta.retroalimentacion = resultado.get("retroalimentacion", "No disponible")
+            respuesta.puntuacion = resultado.get("puntuacion", 5)  # Por defecto 5 si no lo devuelve
             respuesta.save()
 
         except Exception as e:
             return Response({"error": f"Error al conectar con OpenAI: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        # Obtener preguntas restantes
+        preguntas_restantes = request.session.get(f"preguntas_entrevista_{entrevista.id}", [])
+
+        if preguntas_restantes:
+            siguiente_pregunta_id = preguntas_restantes.pop(0)
+            siguiente_pregunta = get_object_or_404(PreguntaEntrevista, id=siguiente_pregunta_id)
+            request.session[f"preguntas_entrevista_{entrevista.id}"] = preguntas_restantes
+        else:
+            siguiente_pregunta_id = None
+            siguiente_pregunta = None
+
+        # **✅ VERIFICAMOS SI ES LA ÚLTIMA PREGUNTA**
+        if not preguntas_restantes:
+            respuestas = RespuestaEntrevista.objects.filter(entrevista=entrevista).values_list('puntuacion', flat=True)
+
+            if not respuestas:
+                return Response({
+                    "mensaje": "Error: No se encontraron respuestas registradas."
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            promedio_puntuacion = sum(respuestas) / len(respuestas)  # **🔥 Arreglamos el cálculo**
+
+            if promedio_puntuacion >= 8:
+                resultado_final = "¡Felicidades! Estás listo para una entrevista real."
+            elif promedio_puntuacion >= 5:
+                resultado_final = "Tienes un desempeño aceptable, pero hay áreas que puedes mejorar."
+            else:
+                resultado_final = "Debes mejorar tus respuestas antes de una entrevista laboral."
+
+            return Response({
+                "mensaje": "Entrevista finalizada",
+                "promedio_puntuacion": promedio_puntuacion,
+                "resultado_final": resultado_final
+            }, status=status.HTTP_200_OK)
+
         return Response({
             "mensaje": "Respuesta guardada y retroalimentación generada",
             "respuesta": respuesta.respuesta,
-            "retroalimentacion": respuesta.retroalimentacion
+            "retroalimentacion": respuesta.retroalimentacion,
+            "puntuacion": respuesta.puntuacion,
+            "siguiente_pregunta_id": siguiente_pregunta.id if siguiente_pregunta else None,
+            "siguiente_pregunta_texto": siguiente_pregunta.texto if siguiente_pregunta else None
         }, status=status.HTTP_201_CREATED)
