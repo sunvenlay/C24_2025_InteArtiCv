@@ -5,6 +5,18 @@
   box-sizing: border-box;
 }
 
+/* Header: Fijo y responsivo */
+header {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Se mantiene sobre el contenido */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Pequeña sombra para destacar */
+}
+
 /* Contenedor Principal de la Guía */
 .terms-container {
   display: flex;
@@ -12,7 +24,8 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh; /* Garantiza que el contenido ocupe toda la pantalla */
-  padding: 700px 40px 60px; /* Se ajusta para evitar que el header cubra contenido */
+  background-color: #f3f4f6;
+  padding: 00px 40px 60px; /* Espacio superior para evitar que el header cubra contenido */
 }
 
 /* Caja Principal */
@@ -26,13 +39,22 @@
   overflow-y: auto;
 }
 
+/* Footer: Mantiene su posición sin romper el diseño */
+footer {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 0;
+  text-align: center;
+  box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.1); /* Sombra superior para separar */
+  margin-top: 40px; /* Separación del contenido */
+}
+
 /* Títulos y Subtítulos */
 .terms-title {
   font-size: 24px;
   font-weight: bold;
   color: #333;
   text-align: center;
-  margin-bottom: 10px;
 }
 
 .terms-subtitle {
@@ -54,75 +76,37 @@
 .terms-text {
   font-size: 16px;
   color: #666;
-  line-height: 1.8; /* Aumentado para mejorar la legibilidad */
+  line-height: 1.6;
   text-align: justify;
 }
 
 .terms-list {
   list-style-type: disc;
-  margin-left: 25px;
+  margin-left: 20px;
   font-size: 16px;
   color: #666;
 }
 
-/* Ajustes específicos para header y footer */
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: white;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px 30px;
-  z-index: 1000;
-}
-
-footer {
-  width: 100%;
-  padding: 15px 0;
-  text-align: center;
-  font-size: 14px;
-  background: #f8f8f8;
-  box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.1);
-}
-
 /* ---- RESPONSIVE DESIGN ---- */
 @media (max-width: 1024px) {
-  .terms-container {
-    padding: calc(10vh + 60px) 5vw 60px; /* Ajusta automáticamente el espacio superior */
-  }
-
   .terms-box {
-    max-width: 90%;
-    padding: 22px;
-  }
-
-  .terms-title {
-    font-size: 22px;
-  }
-
-  .terms-text {
-    font-size: 15px;
-  }
-
-  .terms-list {
-    margin-left: 20px;
-    font-size: 15px;
+    max-width: 90%; /* Ajusta el ancho en pantallas medianas */
   }
 }
 
 @media (max-width: 768px) {
   .terms-container {
-    padding: calc(12vh + 50px) 5vw 50px; /* Mayor margen en pantallas más pequeñas */
+    padding: 100px 10px 40px; /* Ajusta espacio para el header */
   }
 
   .terms-box {
     padding: 20px;
     max-width: 95%;
+    margin: 10px auto;
   }
 
   .terms-title {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .terms-subtitle {
@@ -134,20 +118,16 @@ footer {
     font-size: 14px;
   }
 
-  header {
-    padding: 12px 20px;
-    font-size: 14px;
-  }
-
+  header,
   footer {
-    padding: 12px 0;
-    font-size: 13px;
+    padding: 10px 0;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
   .terms-container {
-    padding: calc(15vh + 40px) 3vw 40px; /* Se adapta en móviles sin exagerar el espacio */
+    padding: 120px 5px 40px;
   }
 
   .terms-box {
@@ -156,7 +136,7 @@ footer {
   }
 
   .terms-title {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .terms-subtitle {
@@ -168,13 +148,9 @@ footer {
     font-size: 13px;
   }
 
-  header {
-    padding: 10px 15px;
-    font-size: 12px;
-  }
-
+  header,
   footer {
-    padding: 10px 0;
+    padding: 8px 0;
     font-size: 12px;
   }
 }

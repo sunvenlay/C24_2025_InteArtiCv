@@ -32,9 +32,7 @@ const Welcome = ({ username = "Personal de DPE" }) => {
         <div className="option-card">
           <img src={interviewSimulationImage} alt="Simulación de Entrevista" />
           <h3>Simulación de Entrevista</h3>
-          <button>
-          <a href="/entrevista">Pruebalo ahora</a>
-          </button>
+          <button>Pruebalo ahora</button>
         </div>
       </div>
 
