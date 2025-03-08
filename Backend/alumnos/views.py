@@ -1,3 +1,4 @@
+import random
 import fitz  # PyMuPDF para extraer texto de PDF
 import docx  # python-docx para extraer texto de Word
 import openai
@@ -11,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from .models import CV, Alumno, Informe
+from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista
 from .serializers import CVSerializer, InformeSerializer
 from rest_framework.generics import ListAPIView
 
@@ -94,7 +95,6 @@ class SubirCVView(APIView):
             "cv": CVSerializer(nuevo_cv).data
         }, status=status.HTTP_201_CREATED)
 
-    
 #historial de los cv's
 class HistorialCVsView(ListAPIView):
     serializer_class = CVSerializer
@@ -152,6 +152,7 @@ class AnalizarCVView(APIView):
         except Exception as e:
             return Response({"error": f"Error al conectar con OpenAI: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+#descarga de Informes PDF
 class DescargarInformePDFView(APIView):
     def get(self, request, informe_id, *args, **kwargs):
         informe = get_object_or_404(Informe, id=informe_id)
@@ -189,3 +190,85 @@ class DescargarInformePDFView(APIView):
         pdf.save()
 
         return response
+
+#IniciarEntrevista
+class IniciarEntrevistaView(APIView):
+    """
+    Inicia una nueva entrevista para un alumno y genera preguntas aleatorias.
+    """
+
+    def post(self, request, *args, **kwargs):
+        alumno_id = request.data.get("alumno_id")
+
+        # Verificar que el alumno existe
+        alumno = get_object_or_404(Alumno, id=alumno_id)
+
+        # Crear una nueva entrevista
+        entrevista = Entrevista.objects.create(alumno=alumno)
+
+        # Seleccionar 5 preguntas aleatorias
+        preguntas = list(PreguntaEntrevista.objects.all())
+        if len(preguntas) < 5:
+            return Response({"error": "No hay suficientes preguntas en la base de datos."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        preguntas_seleccionadas = random.sample(preguntas, 5)
+
+        return Response({
+            "mensaje": "Entrevista iniciada",
+            "entrevista_id": entrevista.id,
+            "preguntas": [{"id": p.id, "texto": p.texto} for p in preguntas_seleccionadas]
+        }, status=status.HTTP_201_CREATED)
+    
+#Envio de respuestas y retroalimentacion con la IA
+class ResponderEntrevistaView(APIView):
+    """
+    Guarda la respuesta de una pregunta de entrevista y genera retroalimentación con ChatGPT.
+    """
+
+    def post(self, request, *args, **kwargs):
+        entrevista_id = request.data.get("entrevista_id")
+        pregunta_id = request.data.get("pregunta_id")
+        respuesta_texto = request.data.get("respuesta")
+
+        entrevista = get_object_or_404(Entrevista, id=entrevista_id)
+        pregunta = get_object_or_404(PreguntaEntrevista, id=pregunta_id)
+
+        respuesta = RespuestaEntrevista.objects.create(
+            entrevista=entrevista,
+            pregunta=pregunta,
+            respuesta=respuesta_texto
+        )
+
+        prompt = f"""
+        Actúa como un entrevistador de una empresa de tecnología. 
+        El candidato respondió a la siguiente pregunta:
+        Pregunta: {pregunta.texto}
+        Respuesta del candidato: {respuesta_texto}
+        
+        Proporciona una retroalimentación detallada sobre la calidad de la respuesta,
+        sugiriendo mejoras si es necesario.
+        """
+
+        try:
+            client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # ✅ PASANDO LA API KEY
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "Eres un experto en entrevistas laborales."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            retroalimentacion_texto = response.choices[0].message.content
+            respuesta.retroalimentacion = retroalimentacion_texto
+            respuesta.save()
+
+        except Exception as e:
+            return Response({"error": f"Error al conectar con OpenAI: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({
+            "mensaje": "Respuesta guardada y retroalimentación generada",
+            "respuesta": respuesta.respuesta,
+            "retroalimentacion": respuesta.retroalimentacion
+        }, status=status.HTTP_201_CREATED)
