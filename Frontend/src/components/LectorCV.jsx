@@ -2,7 +2,7 @@ import "../styles/LectorCV.css";
 import Footer from "./Footer";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaCheckCircle, FaTimesCircle, FaDownload, FaFileAlt, FaSearch, FaFilePdf } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaDownload, FaSearch, FaFilePdf } from "react-icons/fa";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
@@ -40,10 +40,11 @@ const LectorCV = () => {
       setCvId(data.id); // 🔹 Guardamos el ID del CV
       setCvUploaded(true);
       setFileName(file.name);
-      setLoading(false);
+      setUploadError(null); // Limpiar errores previos
     } catch (error) {
       console.error("❌ Error:", error);
       setUploadError(error.message || "Error al subir el CV. Inténtalo de nuevo.");
+    } finally {
       setLoading(false);
     }
   };
@@ -73,10 +74,11 @@ const LectorCV = () => {
       setAnalysisText(data.analisis); // 🔹 Guarda el texto del análisis
       setReportReady(true);
       setReportId(data.informe_id); // Guardamos el ID del informe
-      setLoading(false);
+      setUploadError(null); // Limpiar errores previos
     } catch (error) {
       console.error("❌ Error:", error);
       setUploadError("Error al analizar el CV. Inténtalo de nuevo.");
+    } finally {
       setLoading(false);
     }
   };
@@ -136,10 +138,11 @@ const LectorCV = () => {
       setReportReady(false);
       setReportId(null);
       setAnalysisText("");
-      setLoading(false);
+      setUploadError(null); // Limpiar errores previos
     } catch (error) {
       console.error("❌ Error:", error);
       setUploadError("Error al cancelar el CV. Inténtalo de nuevo.");
+    } finally {
       setLoading(false);
     }
   };
@@ -204,10 +207,10 @@ const LectorCV = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <button className="review-btn" onClick={analyzeCV}>
+              <button className="review-btn" onClick={analyzeCV} disabled={loading}>
                 <FaSearch /> Analizar CV
               </button>
-              <button className="reject-btn" onClick={handleCancel}>
+              <button className="reject-btn" onClick={handleCancel} disabled={loading}>
                 <FaTimesCircle /> Cancelar
               </button>
             </motion.div>

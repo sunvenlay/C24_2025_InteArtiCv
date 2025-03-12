@@ -19,8 +19,6 @@ from .serializers import CVSerializer, InformeSerializer
 from rest_framework.generics import ListAPIView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Alumno
-import json
 from datetime import datetime
 
 
