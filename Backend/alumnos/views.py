@@ -14,11 +14,11 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista
+from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista, Habilidad, TipoHabilidad, CVHabilidad
 from .serializers import CVSerializer, InformeSerializer
 from rest_framework.generics import ListAPIView
 
-#subir cv
+#subir cv con validaciones y habilidades analicis
 class SubirCVView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
@@ -57,6 +57,57 @@ class SubirCVView(APIView):
             return False, faltantes
         return True, []
 
+    def extraer_habilidades_con_ia(self, contenido_extraido):
+        """
+        Extrae las habilidades del contenido del CV usando OpenAI.
+        """
+        # Configurar el prompt para OpenAI
+        prompt = f"""
+        Analiza el siguiente texto de un currículum y extrae una lista de habilidades técnicas y blandas.
+        Devuelve la respuesta en formato JSON con las siguientes claves:
+        - "habilidades_tecnicas": Lista de habilidades técnicas.
+        - "habilidades_blandas": Lista de habilidades blandas.
+
+        Texto del CV:
+        {contenido_extraido}
+        """
+
+        try:
+            # Llamar a la API de OpenAI
+            client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+            response = client.chat.completions.create(
+                model="gpt-4",  # Puedes usar "gpt-3.5-turbo" si no tienes acceso a GPT-4
+                messages=[
+                    {"role": "system", "content": "Eres un experto en recursos humanos y solo respondes en formato JSON válido."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            # Obtener la respuesta y convertirla a JSON
+            respuesta = response.choices[0].message.content.strip()
+            habilidades = json.loads(respuesta)
+
+            # Crear o recuperar las habilidades en la base de datos
+            habilidades_encontradas = []
+
+            # Habilidades técnicas
+            tipo_tecnica, _ = TipoHabilidad.objects.get_or_create(nombre="Técnica")
+            for habilidad in habilidades.get("habilidades_tecnicas", []):
+                habilidad_obj, _ = Habilidad.objects.get_or_create(tipo=tipo_tecnica, habilidad=habilidad)
+                habilidades_encontradas.append(habilidad_obj)
+
+            # Habilidades blandas
+            tipo_blanda, _ = TipoHabilidad.objects.get_or_create(nombre="Blanda")
+            for habilidad in habilidades.get("habilidades_blandas", []):
+                habilidad_obj, _ = Habilidad.objects.get_or_create(tipo=tipo_blanda, habilidad=habilidad)
+                habilidades_encontradas.append(habilidad_obj)
+
+            return habilidades_encontradas
+
+        except Exception as e:
+            print(f"Error al conectar con OpenAI: {e}")
+            return []
+
     def post(self, request, *args, **kwargs):
         alumno_id = request.data.get("alumno_id")
         archivo = request.FILES.get("archivo")
@@ -88,6 +139,9 @@ class SubirCVView(APIView):
                 "secciones_faltantes": faltantes
             })
 
+        # Extraer habilidades del contenido del CV usando OpenAI
+        habilidades_encontradas = self.extraer_habilidades_con_ia(contenido_extraido)
+
         # Guardar el archivo en el sistema de archivos solo si pasa todas las validaciones
         nombre_archivo = archivo.name
         contenido_archivo = archivo.read()
@@ -98,12 +152,17 @@ class SubirCVView(APIView):
         nuevo_cv.contenido_extraido = contenido_extraido
         nuevo_cv.save()
 
+        # Asociar las habilidades encontradas al CV
+        for habilidad in habilidades_encontradas:
+            CVHabilidad.objects.create(cv=nuevo_cv, habilidad=habilidad)
+
         return Response({
             "mensaje": "CV subido y procesado correctamente",
-            "cv": CVSerializer(nuevo_cv).data
+            "cv": CVSerializer(nuevo_cv).data,
+            "habilidades_encontradas": [str(h) for h in habilidades_encontradas]  # Opcional: Mostrar habilidades encontradas
         }, status=status.HTTP_201_CREATED)
 
-#historial de los cv's
+#historial de los cv's 
 class HistorialCVsView(ListAPIView):
     serializer_class = CVSerializer
 
