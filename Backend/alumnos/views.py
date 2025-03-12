@@ -1,8 +1,8 @@
 import json
-import random
 import fitz  # PyMuPDF para extraer texto de PDF
 import docx  # python-docx para extraer texto de Word
 import openai
+from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.conf import settings
 from reportlab.lib.pagesizes import letter
@@ -11,6 +11,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import simpleSplit  # Para ajustar el texto automáticamente
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista
@@ -19,21 +20,21 @@ from rest_framework.generics import ListAPIView
 
 #subir cv
 class SubirCVView(APIView):
-    parser_classes = (MultiPartParser, FormParser)  # Permite la subida de archivos
+    parser_classes = (MultiPartParser, FormParser)
 
-    def extraer_texto_cv(self, ruta_archivo):
+    def extraer_texto_cv(self, archivo):
         """
-        Extrae el texto de un archivo PDF o DOCX desde su ruta.
+        Extrae el texto de un archivo PDF o DOCX.
         """
         contenido = ""
 
-        if ruta_archivo.endswith(".pdf"):
-            with fitz.open(ruta_archivo) as pdf:
+        if archivo.name.endswith(".pdf"):
+            with fitz.open(stream=archivo.read(), filetype="pdf") as pdf:
                 for pagina in pdf:
                     contenido += pagina.get_text("text") + "\n"
 
-        elif ruta_archivo.endswith(".docx"):
-            doc = docx.Document(ruta_archivo)
+        elif archivo.name.endswith(".docx"):
+            doc = docx.Document(archivo)
             contenido = "\n".join([p.text for p in doc.paragraphs])
 
         return contenido.strip()
@@ -58,36 +59,42 @@ class SubirCVView(APIView):
 
     def post(self, request, *args, **kwargs):
         alumno_id = request.data.get("alumno_id")
+        archivo = request.FILES.get("archivo")
 
-        # Validar que el alumno existe
+        if not archivo:
+            raise ValidationError("Debe subir un archivo")
+
         try:
             alumno = Alumno.objects.get(id=alumno_id)
         except Alumno.DoesNotExist:
-            return Response({"error": "El alumno no existe"}, status=status.HTTP_404_NOT_FOUND)
+            raise ValidationError("El alumno no existe")
 
-        # Guardar el archivo
-        archivo = request.FILES.get("archivo")
-        if not archivo:
-            return Response({"error": "Debe subir un archivo"}, status=status.HTTP_400_BAD_REQUEST)
+        # Validar el tipo de archivo
+        if not archivo.name.endswith(('.pdf', '.docx')):
+            raise ValidationError("El archivo debe ser un PDF o DOCX")
 
-        # Crear y guardar el objeto CV primero
-        nuevo_cv = CV.objects.create(alumno=alumno, archivo=archivo)
-        
-        # Obtener la ruta completa del archivo guardado
-        ruta_archivo = nuevo_cv.archivo.path
+        # Validar el tamaño del archivo (por ejemplo, 5MB máximo)
+        if archivo.size > 5 * 1024 * 1024:
+            raise ValidationError("El archivo no puede ser mayor a 5MB")
 
-        # Extraer texto del archivo después de guardarlo
-        contenido_extraido = self.extraer_texto_cv(ruta_archivo)
+        # Extraer texto del archivo sin guardarlo en el sistema de archivos
+        contenido_extraido = self.extraer_texto_cv(archivo)
 
         # Validar que el contenido del CV tenga las secciones necesarias
         es_valido, faltantes = self.validar_campos_cv(contenido_extraido)
         if not es_valido:
-            return Response({
+            raise ValidationError({
                 "error": "El CV no contiene todas las secciones obligatorias.",
                 "secciones_faltantes": faltantes
-            }, status=status.HTTP_400_BAD_REQUEST)
+            })
 
-        # Actualizar el CV con el contenido extraído
+        # Guardar el archivo en el sistema de archivos solo si pasa todas las validaciones
+        nombre_archivo = archivo.name
+        contenido_archivo = archivo.read()
+
+        # Crear y guardar el objeto CV
+        nuevo_cv = CV(alumno=alumno)
+        nuevo_cv.archivo.save(nombre_archivo, ContentFile(contenido_archivo))
         nuevo_cv.contenido_extraido = contenido_extraido
         nuevo_cv.save()
 
