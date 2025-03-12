@@ -1,9 +1,16 @@
 import { useState } from "react";
-import PropTypes from "prop-types"; // ✅ Importar PropTypes
-import "../styles/Perfil.css"; 
+import { useNavigate } from "react-router-dom"; // ✅ Importamos useNavigate
+import PropTypes from "prop-types";
+import "../styles/Perfil.css";
 
 const Perfil = ({ onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate(); // ✅ Hook para redireccionar
+
+  const handleLogout = () => {
+    onLogout(); // Llamamos la función de logout
+    navigate("/"); // ✅ Redirigimos al login
+  };
 
   return (
     <div className="perfil-container">
@@ -13,18 +20,20 @@ const Perfil = ({ onLogout }) => {
       </button>
 
       {/* Menú desplegable con animación */}
-      <div className={`perfil-menu ${menuOpen ? "show" : ""}`}>
-        <button className="logout-button" onClick={onLogout}>
-          🚪 Logout
-        </button>
-      </div>
+      {menuOpen && (
+        <div className="perfil-menu show">
+          <button className="logout-button" onClick={handleLogout}>
+            🚪 Logout
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 /* ✅ Validar las props con PropTypes */
 Perfil.propTypes = {
-  onLogout: PropTypes.func.isRequired, // onLogout debe ser una función y es obligatorio
+  onLogout: PropTypes.func.isRequired,
 };
 
 export default Perfil;
