@@ -16,8 +16,13 @@ from rest_framework import status
 from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista
 from .serializers import CVSerializer, InformeSerializer
 from rest_framework.generics import ListAPIView
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Alumno
+import json
+from datetime import datetime
 
-#subir cv
+# Subir CV
 class SubirCVView(APIView):
     parser_classes = (MultiPartParser, FormParser)  # Permite la subida de archivos
 
@@ -96,7 +101,7 @@ class SubirCVView(APIView):
             "cv": CVSerializer(nuevo_cv).data
         }, status=status.HTTP_201_CREATED)
 
-#historial de los cv's
+# Historial de los CV's
 class HistorialCVsView(ListAPIView):
     serializer_class = CVSerializer
 
@@ -104,7 +109,7 @@ class HistorialCVsView(ListAPIView):
         alumno_id = self.kwargs.get("alumno_id")
         return CV.objects.filter(alumno__id=alumno_id).order_by("-fecha_creacion")
 
-#Analisis de CV con IA
+# Análisis de CV con IA
 class AnalizarCVView(APIView):
     """
     Analiza el contenido de un CV usando OpenAI (ChatGPT).
@@ -153,7 +158,7 @@ class AnalizarCVView(APIView):
         except Exception as e:
             return Response({"error": f"Error al conectar con OpenAI: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#descarga de Informes PDF
+# Descarga de Informes PDF
 class DescargarInformePDFView(APIView):
     def get(self, request, informe_id, *args, **kwargs):
         informe = get_object_or_404(Informe, id=informe_id)
@@ -192,7 +197,7 @@ class DescargarInformePDFView(APIView):
 
         return response
 
-#IniciarEntrevista
+# Iniciar Entrevista
 class IniciarChatEntrevistaView(APIView):
     """
     Inicia una entrevista en formato chatbot, enviando la primera pregunta.
@@ -218,7 +223,7 @@ class IniciarChatEntrevistaView(APIView):
             "pregunta_texto": primera_pregunta.texto
         }, status=status.HTTP_201_CREATED)
 
-#Envio de respuestas y retroalimentacion con la IA
+# Envío de respuestas y retroalimentación con la IA
 class ChatEntrevistaView(APIView):
     """
     Permite responder una pregunta en el chat de la entrevista y obtener retroalimentación.
@@ -325,3 +330,29 @@ class ChatEntrevistaView(APIView):
             "siguiente_pregunta_texto": siguiente_pregunta.texto if siguiente_pregunta else None
         }, status=status.HTTP_201_CREATED)
 
+# Vista para el login con Google
+@csrf_exempt
+def google_login(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        google_id = data.get('google_id')
+        nombre = data.get('nombre')
+        correo = data.get('correo')
+
+        # Buscar si el usuario ya existe en la base de datos
+        alumno, created = Alumno.objects.get_or_create(
+            google_id=google_id,
+            defaults={
+                'nombre': nombre,
+                'correo': correo,
+                'fecha_ultimo_acceso': datetime.now()
+            }
+        )
+
+        if not created:
+            # Si el usuario ya existe, actualizar la fecha de último acceso
+            alumno.fecha_ultimo_acceso = datetime.now()
+            alumno.save()
+
+        return JsonResponse({'status': 'success', 'alumno_id': alumno.id})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)

@@ -1,10 +1,9 @@
 from django.db import models
 
-### MODELO ALUMNO ###
 class Alumno(models.Model):
     nombre = models.CharField(max_length=255)
-    correo = models.EmailField(unique=True)  # Solo usuarios con dominio institucional
-    contrasena = models.CharField(max_length=255)
+    correo = models.EmailField()  # No es único si permitimos múltiples métodos de autenticación
+    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True)  # ID único de Google
     fecha_ultimo_acceso = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

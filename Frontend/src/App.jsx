@@ -14,10 +14,16 @@ const App = () => {
   // Detecta si es la página de login
   const isLoginPage = location.pathname === "/";
 
+  // 🔹 Función para manejar el logout
+  const handleLogout = () => {
+    console.log("Usuario ha cerrado sesión");
+    // Aquí puedes agregar la lógica para cerrar sesión, como limpiar el estado o redirigir al login
+  };
+
   return (
     <>
       {/* Muestra el Header en todas las páginas excepto en Login */}
-      {!isLoginPage && <Header />}
+      {!isLoginPage && <Header onLogout={handleLogout} />}
 
       <Routes>
         <Route path="/" element={<Login />} /> {/* Página de login */}
@@ -30,6 +36,11 @@ const App = () => {
       </Routes>
     </>
   );
+};
+
+// 🔹 Define las propTypes para App
+App.propTypes = {
+  // Aquí puedes definir las propTypes si es necesario
 };
 
 export default App;

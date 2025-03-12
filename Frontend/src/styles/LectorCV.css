@@ -51,7 +51,37 @@
   position: relative;
 }
 
-/* Barra de revisión */
+.uploaded-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: black; /* Texto en negro */
+}
+
+.file-icon {
+  font-size: 24px;
+  color: #e74c3c; /* Color rojo para el ícono de PDF */
+  animation: bounce 1s infinite; /* Animación de rebote */
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.file-name {
+  font-weight: bold;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
 .review-bar {
   display: flex;
   justify-content: center;
@@ -67,7 +97,6 @@
   margin-top: 30px;
 }
 
-/* Botones en modo escritorio: tamaño fijo */
 .review-bar button {
   display: flex;
   align-items: center;
@@ -92,7 +121,6 @@
   transform: scale(1.05);
 }
 
-/* Botones individuales */
 .btn-review { background: #17a2b8; }
 .btn-review:hover { background: #117a8b; }
 
@@ -102,7 +130,6 @@
 .btn-reject { background: #dc3545; }
 .btn-reject:hover { background: #b21f2d; }
 
-/* Footer */
 .footer-container {
   width: 100%;
   text-align: center;
@@ -115,7 +142,34 @@
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Ajustes para pantallas pequeñas (responsive) */
+.analysis-panel {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+  width: 40%;
+}
+
+.analysis-text {
+  margin-top: 10px;
+  white-space: pre-wrap; /* Para mantener el formato del texto */
+  color: black; /* Texto en negro */
+}
+
+.download-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 @media screen and (max-width: 768px) {
   .review-bar {
     flex-direction: column;
@@ -128,7 +182,6 @@
     font-size: 18px;       /* Se reduce ligeramente el tamaño de fuente */
   }
   
-  /* Opcional: Mostrar solo iconos en móviles para ahorrar espacio */
   .review-bar button span {
     display: none;
   }

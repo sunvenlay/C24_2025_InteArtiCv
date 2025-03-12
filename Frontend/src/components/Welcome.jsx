@@ -1,11 +1,15 @@
 import PropTypes from "prop-types";
-import "../styles/Welcome.css"; // Se mantiene el archivo de estilos externo
+import { useLocation } from 'react-router-dom'; // Para obtener el estado de la ruta
+import "../styles/Welcome.css";
 import Header from "./Header";
 import Footer from "./Footer";
-import cvReaderImage from "../assets/cv-reader.png"; // Importamos las imágenes correctamente
-import interviewSimulationImage from "../assets/interview-simulation.png"; // Otra imagen
+import cvReaderImage from "../assets/cv-reader.png";
+import interviewSimulationImage from "../assets/interview-simulation.png";
 
 const Welcome = ({ username = "Personal de DPE" }) => {
+  const location = useLocation();
+  const user = location.state?.username || username;
+
   return (
     <div className="welcome-container">
       <Header />
@@ -13,7 +17,7 @@ const Welcome = ({ username = "Personal de DPE" }) => {
       {/* Caja de Bienvenida */}
       <div className="welcome-box">
         <h1 className="welcome-text">
-          Bienvenido/a <span className="username">({username})</span>
+          Bienvenido/a <span className="username">({user})</span>
         </h1>
       </div>
 
