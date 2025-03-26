@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 
  
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,11 +28,16 @@ SECRET_KEY = 'django-insecure-=s&auwajt74dcq0a=g4jig!^ft5g)c6ebw^nxewm)1waap&w3+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "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")
 
 # Application definition
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,8 +46,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_framework.authtoken',  # Agregar esto
     
     'rest_framework',
+    'rest_framework_simplejwt',
     'alumnos',
     'corsheaders'
 ]
@@ -57,6 +71,8 @@ MIDDLEWARE = [
 
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'TecsupAPI.urls'
@@ -139,3 +155,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Dominio de tu frontend de React
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+

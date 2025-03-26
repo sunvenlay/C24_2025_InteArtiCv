@@ -2,9 +2,11 @@ import json
 import fitz  # PyMuPDF para extraer texto de PDF
 import docx  # python-docx para extraer texto de Word
 import openai
+import os
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from reportlab.lib.pagesizes import letter
 from django.shortcuts import get_object_or_404
 from reportlab.pdfgen import canvas
@@ -14,13 +16,54 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CV, Alumno, Informe, Entrevista, PreguntaEntrevista, RespuestaEntrevista, Habilidad, TipoHabilidad, CVHabilidad
-from .serializers import CVSerializer, InformeSerializer
+from .serializers import CVSerializer, InformeSerializer, AlumnoRegistroSerializer, AlumnoLoginSerializer
+from alumnos.models import Alumno 
 from rest_framework.generics import ListAPIView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 
+
+from django.utils import timezone
+
+
+
+class RegistroView(APIView):
+    def post(self, request):
+        serializer = AlumnoRegistroSerializer(data=request.data)
+        if serializer.is_valid():
+            alumno = serializer.save()
+            return Response({
+                'mensaje': 'Alumno registrado exitosamente',
+                'alumno_id': alumno.id
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = AlumnoLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            alumno = serializer.validated_data['alumno']
+            
+            # Actualizar última fecha de acceso
+            alumno.fecha_ultimo_acceso = timezone.now()
+            alumno.save()
+
+            # Generar tokens JWT
+            refresh = RefreshToken.for_user(alumno)
+            
+            return Response({
+                'mensaje': 'Inicio de sesión exitoso',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'alumno_id': alumno.id,
+                'nombre': alumno.nombre
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 class SubirCVView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -393,30 +436,3 @@ class ChatEntrevistaView(APIView):
             "siguiente_pregunta_id": siguiente_pregunta.id if siguiente_pregunta else None,
             "siguiente_pregunta_texto": siguiente_pregunta.texto if siguiente_pregunta else None
         }, status=status.HTTP_201_CREATED)
-
-# Vista para el login con Google
-@csrf_exempt
-def google_login(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        google_id = data.get('google_id')
-        nombre = data.get('nombre')
-        correo = data.get('correo')
-
-        # Buscar si el usuario ya existe en la base de datos
-        alumno, created = Alumno.objects.get_or_create(
-            google_id=google_id,
-            defaults={
-                'nombre': nombre,
-                'correo': correo,
-                'fecha_ultimo_acceso': datetime.now()
-            }
-        )
-
-        if not created:
-            # Si el usuario ya existe, actualizar la fecha de último acceso
-            alumno.fecha_ultimo_acceso = datetime.now()
-            alumno.save()
-
-        return JsonResponse({'status': 'success', 'alumno_id': alumno.id})
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)

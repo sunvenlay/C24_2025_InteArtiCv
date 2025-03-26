@@ -1,9 +1,39 @@
 from rest_framework import serializers
+from django.contrib.auth.hashers import check_password
 from .models import (
     Alumno, CV, TipoHabilidad, Habilidad, CVHabilidad,
     Informe, InformeFortalezas, InformeHabilidades, InformeAreasMejora,
     PreguntaEntrevista, Entrevista, RespuestaEntrevista, HistorialEntrevista
 )
+
+
+class AlumnoRegistroSerializer(serializers.ModelSerializer):
+    confirmar_contrasena = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Alumno
+        fields = ['nombre', 'correo', 'contrasena', 'confirmar_contrasena']
+        extra_kwargs = {
+            'contrasena': {'write_only': True}
+        }
+
+    def validate(self, data):
+        if data['contrasena'] != data.pop('confirmar_contrasena'):
+            raise serializers.ValidationError({"contrasena": "Las contraseñas no coinciden"})
+        return data
+
+class AlumnoLoginSerializer(serializers.Serializer):
+    correo = serializers.EmailField()
+    contrasena = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        try:
+            alumno = Alumno.objects.get(correo=data['correo'])
+            if not check_password(data['contrasena'], alumno.contrasena):
+                raise serializers.ValidationError("Credenciales inválidas")
+            return {'alumno': alumno}
+        except Alumno.DoesNotExist:
+            raise serializers.ValidationError("Credenciales inválidas")    
 
 ### SERIALIZER PARA ALUMNO ###
 class AlumnoSerializer(serializers.ModelSerializer):

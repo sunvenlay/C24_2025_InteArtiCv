@@ -1,14 +1,20 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password
 
 class Alumno(models.Model):
     nombre = models.CharField(max_length=255)
-    correo = models.EmailField()  # No es único si permitimos múltiples métodos de autenticación
-    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True)  # ID único de Google
+    correo = models.EmailField()
     fecha_ultimo_acceso = models.DateTimeField(null=True, blank=True)
     contrasena = models.CharField(max_length=255)
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        # Encriptar contraseña solo si ha cambiado
+        if not self.pk or 'contrasena' in kwargs.get('update_fields', []):
+            self.contrasena = make_password(self.contrasena)
+        super().save(*args, **kwargs)
 
 ### MODELO CV ###
 class CV(models.Model):
