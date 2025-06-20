@@ -1,17 +1,32 @@
-/* Reset general para evitar márgenes y padding extra */
+/* ===== VARIABLES DE COLORES TECSUP ===== */
+:root {
+  --tecsup-celeste: #00BFFF;
+  --tecsup-celeste-hover: #1E90FF;
+  --tecsup-celeste-light: #87CEEB;
+  --tecsup-blanco: #ffffff;
+  --tecsup-gris-muy-claro: #f8f9fa;
+  --tecsup-gris-claro: #e9ecef;
+  --tecsup-gris-medio: #6c757d;
+  --tecsup-gris-oscuro: #495057;
+  --tecsup-border: #dee2e6;
+  --tecsup-verde: #28a745;
+  --tecsup-azul-oscuro: #007bff;
+}
+
+/* Reset general */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Asegurar que el body y el html ocupen toda la pantalla sin espacios extra */
+/* Body y HTML */
 html, body {
   width: 100%;
   height: 100%;
-  overflow-x: hidden; /* Evita barras de desplazamiento horizontales */
-  background-size: cover;
-  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, var(--tecsup-gris-muy-claro) 0%, var(--tecsup-blanco) 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
 /* Contenedor principal */
@@ -21,198 +36,385 @@ html, body {
   align-items: center;
   justify-content: center;
   width: 100vw;
-  min-height: 100vh; /* Asegura que el contenido cubra toda la pantalla */
-  padding: 20px;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 auto !important;
+  transform: none !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
 }
 
 .welcome-text {
-  color: black; /* Asegura que el texto "Bienvenido/a" esté en negro */
-  font-size: 24px; /* Ajusta el tamaño si es necesario */
-  font-weight: bold; /* Opcional: hace que se vea más destacado */
+  color: var(--tecsup-celeste);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-/* Caja de bienvenida - Siempre visible */
+/* Caja de bienvenida */
 .welcome-box {
-  background: white;
-  padding: 15px 30px;
-  border-radius: 15px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  background: var(--tecsup-blanco);
+  padding: 25px 40px;
+  border-radius: 20px;
+  box-shadow: 0px 10px 30px rgba(0, 191, 255, 0.1);
+  border: 2px solid var(--tecsup-celeste-light);
   text-align: center;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 600;
   width: 90%;
-  max-width: 600px;
-  margin-bottom: 20px;
+  max-width: 700px;
+  margin-bottom: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
 }
 
-/* Asegurar que el nombre del usuario se vea */
+.welcome-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 15px 40px rgba(0, 191, 255, 0.15);
+}
+
 .username {
-  color: black;
-  font-weight: bold;
-  font-size: 18px;
+  color: var(--tecsup-celeste);
+  font-weight: 700;
+  font-size: 20px;
 }
 
-/* Contenedor de las opciones */
+/* Contenedor de opciones */
 .options-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   justify-content: center;
   align-items: center;
   width: 100%;
-  gap: 15px;
+  max-width: 1000px;
+  gap: 40px;
+  padding: 0 20px;
+  margin: 0 auto !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 /* Tarjetas de opciones */
 .option-card {
-  background: white;
-  padding: 15px;
-  color: black;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  background: var(--tecsup-blanco);
+  padding: 30px 25px;
+  color: var(--tecsup-gris-oscuro);
+  border-radius: 20px;
+  box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
   text-align: center;
-  width: 90%;
-  max-width: 320px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+  min-height: 320px;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Efecto superior de color */
+.option-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--tecsup-celeste), var(--tecsup-celeste-light));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.option-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Primera tarjeta - Lector CV */
+.option-card:first-child {
+  background: linear-gradient(135deg, #e3f2fd 0%, var(--tecsup-blanco) 100%);
+}
+
+.option-card:first-child h3 {
+  color: var(--tecsup-azul-oscuro);
+}
+
+/* Segunda tarjeta - Entrevista */
+.option-card:last-child {
+  background: linear-gradient(135deg, #e8f5e8 0%, var(--tecsup-blanco) 100%);
+}
+
+.option-card:last-child h3 {
+  color: var(--tecsup-verde);
 }
 
 .option-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-10px);
+  box-shadow: 0px 25px 50px rgba(0, 191, 255, 0.15);
 }
 
 /* Imagen dentro de la tarjeta */
 .option-card img {
-  width: 100%;
-  border-radius: 10px;
+  width: 120px;
+  height: 120px;
+  border-radius: 15px;
+  margin: 0 auto 20px auto;
+  object-fit: cover;
+  transition: all 0.4s ease;
+}
+
+.option-card:hover img {
+  transform: scale(1.1) rotate(2deg);
 }
 
 /* Título dentro de la tarjeta */
 .option-card h3 {
-  font-size: 16px;
-  margin: 10px 0;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 20px 0 15px 0;
+  line-height: 1.3;
 }
 
-/* Botón */
+/* Descripción de la tarjeta */
+.option-card p {
+  font-size: 14px;
+  color: var(--tecsup-gris-medio);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Botones */
 .option-card button {
-  background-color: #0889a6;
-  color: white;
-  padding: 10px;
+  background: linear-gradient(135deg, var(--tecsup-celeste), var(--tecsup-celeste-hover))!important; 
+  color: white !important;
+  padding: 14px 25px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
   width: 100%;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
 }
 
-/* Asegurar que el enlace dentro del botón tenga el mismo color */
+.option-card button:hover {
+  background: linear-gradient(135deg, var(--tecsup-celeste-hover), #0066CC);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 191, 255, 0.4);
+}
+
 .option-card button a {
   color: white !important;
   text-decoration: none !important;
   display: block;
   width: 100%;
+  font-weight: 600;
 }
 
-/* Efecto hover en el botón */
-.option-card button:hover {
-  background-color: #066b85;
-}
-
-/* Evitar bordes negros en el botón al hacer click */
 .option-card button:focus {
   outline: none;
   border: none;
 }
 
-/* Estilo del Footer */
+/* Footer */
 footer {
   width: 100%;
   text-align: center;
-  background: white !important;
-  padding: 10px;
-  border-top: 1px solid #ccc;
+  background: var(--tecsup-blanco) !important;
+  padding: 20px;
+  border-top: 1px solid var(--tecsup-border);
   position: relative;
+  margin-top: 50px;
+  color: var(--tecsup-gris-medio);
+  font-size: 14px;
 }
 
-/* 📌 RESPONSIVE DESIGN */
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-/* Tablets */
+.option-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.option-card:first-child {
+  animation-delay: 0.1s;
+}
+
+.option-card:last-child {
+  animation-delay: 0.2s;
+}
+
+/* Responsive Design */
+
+/* Tablets grandes */
 @media (max-width: 1024px) {
+  .options-container {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    max-width: 800px;
+  }
+
   .welcome-box {
-    font-size: 16px;
+    font-size: 18px;
     width: 90%;
+    padding: 20px 30px;
   }
 
   .option-card {
-    max-width: 280px;
+    max-width: 350px;
+    min-height: 300px;
+    padding: 25px 20px;
   }
 }
 
-/* Móviles */
+/* Tablets */
 @media (max-width: 768px) {
   .welcome-container {
-    height: auto;
     padding: 30px 15px;
+  }
+
+  .options-container {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    max-width: 400px;
   }
 
   .welcome-box {
     font-size: 16px;
     padding: 15px 20px;
     width: 90%;
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 40px;
   }
 
-  .options-container {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+  .welcome-text {
+    font-size: 24px;
   }
 
   .option-card {
-    width: 85%;
-    max-width: 280px;
-    padding: 12px;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 15px;
+    min-height: 280px;
+  }
+
+  .option-card img {
+    width: 100px;
+    height: 100px;
   }
 
   .option-card h3 {
-    font-size: 14px;
+    font-size: 18px;
   }
 
   .option-card button {
-    font-size: 12px;
-    padding: 8px;
+    font-size: 14px;
+    padding: 12px 20px;
   }
 }
 
-/* Dispositivos pequeños */
+/* Móviles */
 @media (max-width: 480px) {
+  .welcome-container {
+    padding: 20px 10px;
+  }
+
+  .welcome-text {
+    font-size: 22px;
+  }
+
   .welcome-box {
     font-size: 14px;
-    padding: 10px 15px;
+    padding: 15px 20px;
+    margin-bottom: 30px;
+  }
+
+  .username {
+    font-size: 16px;
   }
 
   .options-container {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+    gap: 20px;
+    max-width: 320px;
   }
 
   .option-card {
-    width: 90%;
-    max-width: 220px;
-    padding: 10px;
+    padding: 18px 12px;
+    min-height: 260px;
+    border-radius: 15px;
+  }
+
+  .option-card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
   }
 
   .option-card h3 {
+    font-size: 16px;
+    margin: 15px 0 10px 0;
+  }
+
+  .option-card p {
     font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .option-card button {
+    font-size: 13px;
+    padding: 10px 18px;
+  }
+
+  footer {
+    padding: 15px;
+    margin-top: 30px;
+    font-size: 12px;
+  }
+}
+
+/* Dispositivos muy pequeños */
+@media (max-width: 360px) {
+  .welcome-text {
+    font-size: 20px;
+  }
+
+  .welcome-box {
+    font-size: 13px;
+    padding: 12px 15px;
+  }
+
+  .option-card {
+    padding: 15px 10px;
+    min-height: 240px;
+  }
+
+  .option-card img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .option-card h3 {
+    font-size: 15px;
   }
 
   .option-card button {
     font-size: 12px;
-    padding: 8px;
+    padding: 8px 15px;
   }
 }

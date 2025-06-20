@@ -7,7 +7,6 @@ import Welcome from "./components/Welcome";
 import LectorCV from "./components/LectorCV";
 import HistorialCV from "./components/HistorialCV";
 import ChatEntrevista from "./components/Entrevista";
-import Background from "./components/Background";
 import ProtectedRoute from "./components/ProtectedRoute";
 import authService from "./services/authService";
 import "./styles/Chat.css";
@@ -26,7 +25,7 @@ const App = () => {
   };
 
   return (
-    <GoogleOAuthProvider clientId="TU_CLIENT_ID_DE_GOOGLE">
+    <GoogleOAuthProvider clientId="258181987281-jd71k4f6k0no7e61qk34mpvc6i7nh2sp.apps.googleusercontent.com">
       {/* Estructura principal completamente reorganizada */}
       <div className="app-root">
         {/* Header fijo en la parte superior */}
@@ -35,11 +34,6 @@ const App = () => {
             <Header onLogout={handleLogout} />
           </div>
         )}
-        
-        {/* Contenedor para el fondo */}
-        <div className="background-wrapper">
-          <Background />
-        </div>
         
         {/* Contenido principal con espacio para evitar el header */}
         <div className={`content-wrapper ${!isLoginPage ? 'with-header' : ''}`}>
